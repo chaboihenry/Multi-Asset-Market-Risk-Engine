@@ -1,0 +1,9 @@
+data/
+notebooks/
+journal/
+papers/
+CLAUDE.md
+.ipynb_checkpoints/
+__pycache__/
+.pytest_cache/
+.DS_Store

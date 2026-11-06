@@ -1,0 +1,25 @@
+Introduction, ironing out some details:
+
+This project builds a risk engine for a portfolio spanning equities, Treasuries, gold, currencies, and a Government of Canada bond priced off a bootstrapped zero curve. 
+It estimates daily Value-at-Risk (VaR) and Expected Shortfall in three ways: 
+    historical simulation, 
+    a parametric (variance-covariance) model, 
+    and Monte Carlo simulation of thousands of future market paths. 
+Each method is then backtested over more than ten years of data with formal statistical tests (Kupiec and Christoffersen). 
+Those tests check whether VaR breaches happen as often as predicted and whether they cluster in time. 
+The engine also stress-tests the portfolio under historical crises and hypothetical shocks, with an extension that propagates shocks through a causal graph 
+rather than using arbitrary scenarios. 
+The result shows which risk models hold up in calm and volatile markets, why they fail when they do, and how much their estimates disagree when it matters most.
+
+
+
+
+
+
+
+
+
+
+
+
+

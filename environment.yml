@@ -1,0 +1,14 @@
+name: risk-engine
+channels:
+  - defaults
+dependencies:
+  - python=3.12
+  - jupyterlab
+  - numpy
+  - yfinance
+  - scipy
+  - pytest
+  - statsmodels
+  - pandas
+  - matplotlib
+prefix: C:\Users\henry\miniconda3\envs\risk-engine
