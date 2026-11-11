@@ -20,6 +20,7 @@ def download(ticker):
         raise ValueError(f"no data returned for {ticker}")
     return df
 
+
 def main():
     YAHOO.mkdir(parents=True, exist_ok=True)
     for ticker in TICKERS:
@@ -31,6 +32,7 @@ def main():
         currency = yf.Ticker(ticker).fast_info['currency']
         print(f"{ticker}: {df.index.min().date()} to {df.index.max().date()}, {len(df)} rows {currency}")
         df.to_csv(output)
+
 
 if __name__ == "__main__":
     main()

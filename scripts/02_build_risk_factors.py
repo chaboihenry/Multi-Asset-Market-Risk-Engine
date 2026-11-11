@@ -41,6 +41,7 @@ def load_boc(path, columns):
     df = pd.read_csv(path, skiprows=marker + 1, index_col='date', encoding='utf-8-sig', parse_dates=True)
     return df[list(columns)].rename(columns=columns)
 
+
 def load_fred(path, name):
     """Read a FRED CSV; return one column called `name`."""
     df = pd.read_csv(path, index_col=0, parse_dates=True)
@@ -48,12 +49,14 @@ def load_fred(path, name):
     df = df.rename(columns={old : name})
     return df[[name]]
 
+
 def load_yahoo(path, name):
     """Read a Yahoo CSV; return Adj Close as one column called `name`."""
     df = pd.read_csv(path, index_col=0, parse_dates=True)
     old = "Adj Close"
     df = df.rename(columns={old : name})
     return df[[name]]
+
 
 def summarize(df:pd.DataFrame):
     """Print each column's dtype, NaN count, and first and last valid dates."""
@@ -64,6 +67,7 @@ def summarize(df:pd.DataFrame):
         "last" : [df[c].last_valid_index().date() for c in df.columns],
     })
     # print(tables, "\n")
+
 
 def build_table(frames:list):
     """Join frames, forward-fill, keep TSX days in the common sample; fail on leftover Nans"""
@@ -79,6 +83,7 @@ def build_table(frames:list):
         bad = list(df.columns[df.isna().any()])
         raise ValueError(f"NaNs remain after forward-fill in: {bad}")
     return df
+
 
 def main():
     frames = [
