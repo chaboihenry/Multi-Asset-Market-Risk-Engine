@@ -1,4 +1,5 @@
-"""Tests for engine/curve.py: T-bill discount factors, zero-rate conversions, interpolation, bond pricing.
+"""
+Tests for engine/curve.py: T-bill discount factors, zero-rate conversions, interpolation, bond pricing.
 Check values: a 90-day bill quoted at 3.00% has D = 0.9926571 and z = 0.030114.
 """
 import pytest
