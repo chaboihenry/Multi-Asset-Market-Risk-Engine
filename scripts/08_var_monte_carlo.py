@@ -40,7 +40,10 @@ def main():
     df = pd.read_csv(PROCESSED / 'var_forecasts.csv', index_col=0, parse_dates=True)
     df['mc_var'] = forecasts['mc_var']
     df['mc_es'] = forecasts['mc_es']
-    df.to_csv(PROCESSED / 'var_forecasts.csv')
+    if WINDOW == 250:
+        df.to_csv(PROCESSED / 'var_forecasts250.csv')
+    else:
+        df.to_csv(PROCESSED / 'var_forecasts.csv')
     print(df.describe())
     print('='*40)
     print(df.shape)

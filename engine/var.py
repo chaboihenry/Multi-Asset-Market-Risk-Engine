@@ -6,7 +6,7 @@ Pure functions, no file I/O.
 
 import pandas as pd
 import numpy as np
-from scipy.stats import norm
+from scipy.stats import norm, t
 
 
 def empirical_var_es(pnl_sample, var_level=0.99, es_level=0.975):
@@ -74,3 +74,16 @@ def normal_var_es(sigma, var_level=0.99, es_level=0.975):
     var_multiplier = norm.ppf(var_level)
     es_multiplier = norm.pdf(norm.ppf(es_level)) / (1 - es_level)
     return sigma * var_multiplier, sigma * es_multiplier
+
+
+def student_t_var_es(sigma, df, var_level=0.99, es_level=0.975):
+    """Parametric VaR and ES for a zero-mean Student-t P&L with volatility `sigma` and `df` degrees of freedom.
+    The t quantile is rescaled by sqrt((df - 2) / df) so that `sigma` stays the P&L's standard deviation."""
+    scale = np.sqrt((df - 2) / df)
+    var_multiplier = t.ppf(var_level, df) * scale
+    q = t.ppf(es_level, df)
+    es_multiplier = (t.pdf(q, df) / (1 - es_level)) * ((df + q ** 2) / (df - 1) * scale)
+    return sigma * var_multiplier, sigma * es_multiplier
+
+
+

@@ -3,8 +3,8 @@ Backtests for VaR forecasts: breach indicators, the Kupiec frequency test, the C
 and the Basel traffic light. Pure functions, no file I/O.
 """
 
-import numpy as np
 from scipy.stats import chi2
+from scipy.special import xlogy
 
 def breaches(pnl, var):
     """True on each day where the loss exceeded the VaR forecast (P&L below -VaR), False otherwise.
@@ -17,8 +17,8 @@ def kupiec_test(n_breaches, n_days, var_level=0.99):
     Returns (LR statistic, p-value); the statistic is chi-squared with 1 degree of freedom under a correct model."""
     p = 1 - var_level
     p_ = n_breaches / n_days
-    lr = -2 * (((n_days - n_breaches) * np.log(1-p)) + (n_breaches * np.log(p))
-                - ((n_days - n_breaches) * np.log(1 - p_)) - (n_breaches * np.log(p_)))
+    lr = -2 * ((xlogy((n_days - n_breaches), 1 - p)) + (xlogy(n_breaches, p))
+                - (xlogy(n_days - n_breaches, 1 - p_)) - (xlogy(n_breaches, p_)))
     return lr, chi2.sf(lr, 1)
 
 
@@ -28,28 +28,47 @@ def christoffersen_test(breach):
     today = breach[1:].to_numpy()
     yesterday = breach[:-1].to_numpy()
 
-    n00 = ((yesterday == False) & (today == False)).sum()
-    n01 = ((yesterday == False) & (today == True)).sum()
-    n10 = ((yesterday == True) & (today == False)).sum()
-    n11 = ((today == True) * (yesterday == True)).sum()
+    n00 = ((~yesterday) & (~today)).sum()
+    n01 = ((~yesterday) & (today)).sum()
+    n10 = ((yesterday) & (~today)).sum()
+    n11 = ((yesterday) & (today)).sum()
 
     p01 = n01 / (n00 + n01)
     p11 = n11 / (n10 + n11)
     p = (n01 + n11) / (n00 + n01 + n10 + n11)
     
-    l0 = ((n00 + n10) * np.log(1-p)) + ((n01 + n11) * np.log(p))
-    l1 = (n00 * np.log(1 - p01)) + (n01 * np.log(p01)) + (n10 * np.log(1-p11)) + (n11 * np.log(p11))
+    l0 = (xlogy(n00 + n10, 1 - p)) + (xlogy(n01 + n11, p))
+    l1 = (xlogy(n00, 1 - p01)) + (xlogy(n01, p01)) + (xlogy(n10, 1 - p11)) + (xlogy(n11, p11))
 
     lr = -2 * (l0 - l1)
     return lr, chi2.sf(lr, 1)
 
 
+def basel_zone(n_breaches):
+    """Basel traffic-light zone for a 250-day backtest of 99% VaR: 
+    'green' (0-4), 'yellow' (5-9) or 'red' (10+)."""
+    if n_breaches >= 0 and n_breaches <= 4:
+        return 'green'
+    elif n_breaches >= 5 and n_breaches <= 9:
+        return 'yellow'
+    else:
+        return 'red'
 
 
-
-
-
-
+def summary_row(pnl, var):
+    """Backtest one model: breaches, breach rate, Kupiec LR and p-value, Christoffersen LR and p-value.
+    Returns a dict with one entry per statistic."""
+    out = {}
+    bre = breaches(pnl, var)
+    out['breaches'] = bre.sum()
+    out['rate'] = bre.sum() / len(bre)
+    kupiec_lr, kupiec_p = kupiec_test(bre.sum(), len(bre), var_level=0.99)
+    out['kupiec_lr'] = kupiec_lr
+    out['kupiec_p'] = kupiec_p
+    christ_lr, christ_p = christoffersen_test(bre)
+    out['christ_lr'] = christ_lr
+    out['christ_p'] = christ_p
+    return out
 
 
 

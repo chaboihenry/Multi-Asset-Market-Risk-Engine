@@ -10,9 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import pandas as pd
 
 from common.paths import PROCESSED
-from engine.var import historical_var_es, rolling_sigma, ewma_sigma, normal_var_es
+from engine.var import historical_var_es, rolling_sigma, ewma_sigma, normal_var_es, student_t_var_es
 
 WINDOW = 500
+DF = 4
 
 def load_pnl():
     """Load the total daily P&L as a Series indexed by date."""
@@ -21,13 +22,14 @@ def load_pnl():
 
 
 def build_forecasts(pnl, window):
-    """Run the three models and return one table: the realised P&L plus a VaR and an ES column per model.
-    Columns: pnl, hs_var, hs_es, norm_var, norm_es, ewma_var, ewma_es; one row per forecast date."""
+    """Run the four models and return one table: the realised P&L plus a VaR and an ES column per model.
+    Columns: pnl, hs_var, hs_es, norm_var, norm_es, ewma_var, ewma_es, ewma_t_var, ewma_t_es; one row per forecast date."""
     hs_df = historical_var_es(pnl, window)
     sigma = rolling_sigma(pnl, window)
     norm_var, norm_es = normal_var_es(sigma)
     ewma_sig = ewma_sigma(pnl, window, lam=0.94)
     ewma_var, ewma_es= normal_var_es(ewma_sig)
+    ewma_t_var, ewma_t_es = student_t_var_es(ewma_sig, DF)
     return pd.DataFrame({
         'pnl' : pnl,
         'hs_var' : hs_df['var'],
@@ -35,7 +37,9 @@ def build_forecasts(pnl, window):
         'norm_var' : norm_var, 
         'norm_es' : norm_es,
         'ewma_var' : ewma_var,
-        'ewma_es' : ewma_es 
+        'ewma_es' : ewma_es,
+        'ewma_t_var' : ewma_t_var,
+        'ewma_t_es' : ewma_t_es
     }, index=hs_df.index)
 
 
@@ -47,7 +51,10 @@ def main():
     print('='*40)
     print(df.describe())
     df.index.name = 'date'
-    df.to_csv(PROCESSED / 'var_forecasts.csv')
+    if WINDOW == 250:
+        df.to_csv(PROCESSED / 'var_forecasts250.csv')
+    else:
+        df.to_csv(PROCESSED / 'var_forecasts.csv')
 
 
 if __name__=="__main__":

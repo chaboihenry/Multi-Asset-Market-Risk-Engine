@@ -1,0 +1,6 @@
+,crisis_breaches,total_breaches,share_of_total_from_crisis
+Historical,41,83,0.4939759036144578
+"Normal, rolling",58,121,0.4793388429752066
+"Normal, EWMA",24,103,0.23300970873786409
+Monte Carlo (t),40,80,0.5
+"Student-t, EWMA",14,66,0.21212121212121213

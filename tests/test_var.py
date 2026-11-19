@@ -12,7 +12,8 @@ from engine.var import (empirical_var_es,
                         historical_var_es,
                         rolling_sigma, 
                         ewma_sigma, 
-                        normal_var_es)
+                        normal_var_es,
+                        student_t_var_es)
 
 def test_empirical_var_es():
     """VaR and ES on the integers -5..5 at 90% / 80% come out as whole numbers, both positive."""
@@ -57,7 +58,11 @@ def test_normal_var_es():
     assert normal_var_es(sigma2) == pytest.approx((232.63, 233.78), abs=0.01)
 
 
-
+def test_student_t_var_es():
+    """EWMA with fatter tails, should return 2.649 and 2.824"""
+    sigma = 1
+    df = 4
+    assert student_t_var_es(sigma, df) == pytest.approx((2.649, 2.824), abs=1e-3)
 
 
 

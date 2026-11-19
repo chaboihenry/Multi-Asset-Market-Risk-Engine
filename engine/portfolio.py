@@ -80,5 +80,21 @@ def min_variance_hedge(asset_ret, fx_ret):
     return 1 + corr * (asset_ret.std() / fx_ret.std())
 
 
+def rolling_min_variance_hedge(asset_ret, fx_ret, window):
+    """Minimum-variance hedge ratio for each day from the previous `window` days only, capped to the range 0 to 1.
+    Returns a Series on the same dates; days without a full window of history are NaN."""
+    out = []
+    dates = []
+    for i in range(window, len(asset_ret)):
+        asset = asset_ret.iloc[i-window:i]
+        fx = fx_ret.iloc[i-window:i]
+        rol = min_variance_hedge(asset, fx)
+        out.append(rol)
+        date = asset_ret.index[i]
+        dates.append(date)
 
+    out = pd.Series(out, index=dates)
+    out = out.clip(lower=0, upper=1)
+    out = out.reindex(asset_ret.index)
+    return out
 
